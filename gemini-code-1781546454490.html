@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Plan Calculator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            /* Adapted for dark theme to match the glowing video */
+            --text-color: #ffffff;
+            --bg-color: #050411; 
+            --accent-color: #00e5ff;
+            --success-color: #10b981;
+            --glow-color: rgba(0, 229, 255, 0.15);
+            --card-bg: rgba(15, 15, 25, 0.6);
+            --card-border: rgba(255, 255, 255, 0.15);
+            --font-main: 'Inter', sans-serif;
+            --font-display: 'Syne', sans-serif;
+            --transition-smooth: cubic-bezier(0.19, 1, 0.22, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-main);
+            color: var(--text-color);
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            cursor: none; 
+            line-height: 1.6;
+            background-color: var(--bg-color);
+        }
+
+        /* Fixed Background Video Covering the Entire Page */
+        .video-bg-wrapper {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .video-bg {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+        }
+
+        /* Overlay to ensure text readability across the entire page (Readability & Contrast) */
+        .video-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(5, 4, 17, 0.6); 
+            backdrop-filter: blur(8px);
+            z-index: 1;
+        }
+
+        /* Dual Cursor System */
+        .cursor {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 20px;
+            height: 20px;
+            background-color: var(--accent-color);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 99999;
+            transform: translate(-50%, -50%);
+            transition: width 0.3s var(--transition-smooth), height 0.3s var(--transition-smooth), background-color 0.3s var(--transition-smooth);
+            mix-blend-mode: screen;
+        }
+
+        .cursor.hovering {
+            width: 60px;
+            height: 60px;
+            background-color: #fff;
+        }
+
+        .cursor-glow {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, var(--glow-color) 0%, transparent 60%);
+            border-radius: 50%;
+            pointer-events: none;
+            transform: translate(-50%, -50%);
+            z-index: 9998;
+            transition: background 0.8s var(--transition-smooth);
+        }
+
+        /* Typography & Visual Hierarchy */
+        h1, h2, h3, h4 {
+            font-family: var(--font-display);
+            font-weight: 700;
+            line-height: 1.2;
+        }
+
+        a, button {
+            text-decoration: none;
+            color: inherit;
+            cursor: none;
+            background: none;
+            border: none;
+            font-family: inherit;
+        }
+
+        /* Navigation Bar (Navbar) */
+        header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 2rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            transition: padding 0.5s ease, background 0.5s ease;
+        }
+
+        header.scrolled {
+            padding: 1.25rem 5%;
+            background: rgba(5, 4, 17, 0.85);
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+            font-family: var(--font-display);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        /* Layout & White Space */
+        .container {
+            max-width: 1200px; /* Tighter container for calculator focus */
+            margin: 0 auto;
+            padding: 0 5%;
+            width: 100%;
+        }
+        .section-pad { padding: 8rem 0; }
+        
+        #content-wrapper {
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Hero Section (Above the Fold) */
+        .hero {
+            position: relative;
+            min-height: 100vh;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 8rem 2rem 4rem;
+        }
+
+        .hero-content {
+            max-width: 800px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .hero h1 {
+            font-size: clamp(3rem, 6vw, 6rem);
+            line-height: 1.05;
+            letter-spacing: -2px;
+            margin-bottom: 1.5rem;
+            animation: slideUp 1s var(--transition-smooth) forwards;
+        }
+
+        .hero-subtitle {
+            font-size: clamp(1.1rem, 2vw, 1.5rem);
+            opacity: 0.8;
+            margin-bottom: 3rem;
+            font-weight: 400;
+            animation: fadeIn 1.2s ease forwards 0.4s;
+        }
+
+        /* Main Input Field */
+        .calc-input-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            animation: fadeIn 1.2s ease forwards 0.6s;
+        }
+
+        .calc-input {
+            width: 100%;
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+            color: var(--text-color);
+            font-size: 3rem;
+            font-family: var(--font-display);
+            font-weight: 700;
+            text-align: center;
+            padding: 1rem;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+        
+        .calc-input:focus {
+            border-color: var(--accent-color);
+        }
+
+        .calc-input::placeholder {
+            color: rgba(255, 255, 255, 0.2);
+        }
+
+        .currency-symbol {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 3rem;
+            font-family: var(--font-display);
+            font-weight: 700;
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        @keyframes slideUp { 
+            from { transform: translateY(40px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; } 
+        }
+        @keyframes fadeIn { 
+            from { opacity: 0; }
+            to { opacity: 1; } 
+        }
+
+        /* Grid & Cards (Consistency & Grid System) */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            margin-bottom: 6rem;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.6s var(--transition-smooth);
+        }
+        
+        .grid.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .card {
+            border: 1px solid var(--card-border);
+            padding: 3rem 2rem;
+            border-radius: 20px;
+            transition: all 0.4s var(--transition-smooth);
+            position: relative;
+            overflow: hidden;
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            text-align: center;
+        }
+        
+        .card::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--accent-color); transform: scaleY(0); transform-origin: bottom;
+            transition: transform 0.4s var(--transition-smooth); z-index: 0;
+        }
+        
+        .card:hover { 
+            border-color: var(--accent-color); 
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 229, 255, 0.1);
+        }
+        
+        .card.active { border-color: var(--accent-color); color: var(--bg-color); }
+        .card.active::before { transform: scaleY(1); }
+
+        .card-content { position: relative; z-index: 1; }
+
+        .card-title {
+            font-size: 1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 1rem;
+            opacity: 0.8;
+        }
+        
+        .card.active .card-title { opacity: 1; }
+
+        .card-days {
+            font-family: var(--font-display);
+            font-size: clamp(2rem, 3vw, 2.5rem);
+            font-weight: 700;
+            line-height: 1.1;
+        }
+
+        /* Visualizer */
+        .visualizer {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.6s var(--transition-smooth);
+            pointer-events: none;
+            padding: 4rem 3rem;
+            border: 1px solid var(--card-border);
+            border-radius: 24px;
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            display: none;
+        }
+        .visualizer.active {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+
+        .vis-header {
+            font-family: var(--font-display);
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 3rem;
+            text-align: center;
+        }
+
+        /* Flexible grid for generated payments */
+        .payment-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1.5rem;
+        }
+
+        .day-block {
+            flex: 1;
+            min-width: 200px;
+            border: 1px solid var(--accent-color);
+            padding: 2.5rem 1rem;
+            text-align: center;
+            border-radius: 16px;
+            background: var(--text-color);
+            color: var(--bg-color);
+            box-shadow: 0 15px 30px rgba(0, 229, 255, 0.1);
+            animation: popIn 0.5s var(--transition-smooth) forwards;
+            opacity: 0;
+            transform: scale(0.9);
+        }
+
+        @keyframes popIn {
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .day-name { font-size: 1.1rem; font-weight: 600; margin-bottom: 0.5rem; opacity: 0.7; }
+        .day-status { font-family: var(--font-display); font-size: 2rem; font-weight: 800; }
+
+        /* CTA (Call to Action) */
+        .btn-continue {
+            display: none;
+            width: 100%;
+            max-width: 300px;
+            margin: 4rem auto 0;
+            background: var(--accent-color);
+            color: var(--bg-color);
+            padding: 1.2rem 2.5rem;
+            border-radius: 100px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.4s var(--transition-smooth);
+        }
+        .btn-continue.visible { display: block; opacity: 1; transform: translateY(0); }
+        .btn-continue:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(0, 229, 255, 0.3); }
+
+        /* Footer */
+        footer { 
+            padding: 4rem 0 2rem; 
+            text-align: center; 
+            border-top: 1px solid var(--card-border); 
+            margin-top: 4rem; 
+            background: rgba(5, 4, 17, 0.5);
+            backdrop-filter: blur(5px);
+        }
+        
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            opacity: 0.6;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 900px) {
+            .grid { grid-template-columns: repeat(1, 1fr); gap: 1.5rem; }
+            .hero { padding-top: 10rem; min-height: auto; }
+            .calc-input { font-size: 2.5rem; }
+            .currency-symbol { font-size: 2.5rem; }
+        }
+
+        @media (max-width: 768px) {
+            header { padding: 1.5rem 5%; }
+            .nav-links { display: none; } /* Simplify on mobile */
+            .section-pad { padding: 4rem 0; }
+            
+            .visualizer { padding: 3rem 1.5rem; }
+            .day-block { min-width: 100%; }
+            
+            /* Disable custom cursor on mobile */
+            .cursor, .cursor-glow { display: none; }
+            body { cursor: auto; }
+            a, button, input { cursor: pointer; }
+            .calc-input { cursor: text; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="video-bg-wrapper">
+        <video class="video-bg" autoplay loop muted playsinline>
+            <source src="15402275_1920_1080_30fps.mp4" type="video/mp4">
+        </video>
+        <div class="video-overlay"></div>
+    </div>
+
+    <div class="cursor-glow" id="cursorGlow"></div>
+    <div class="cursor" id="custom-cursor"></div>
+
+    <header id="main-header">
+        <a href="#" class="logo hover-target">SplitPay</a>
+        <nav class="nav-links">
+            <a href="#" class="hover-target">How it Works</a>
+            <a href="#" class="hover-target">FAQ</a>
+            <a href="#" class="hover-target">Support</a>
+        </nav>
+    </header>
+
+    <main id="content-wrapper">
+        
+        <section class="hero container">
+            <div class="hero-content">
+                <h1>Payment Calculator</h1>
+                <p class="hero-subtitle">Enter your total amount to automatically split it into whole USD payments.</p>
+                
+                <div class="calc-input-wrapper hover-target">
+                    <span class="currency-symbol">$</span>
+                    <input type="number" id="calc-input" class="calc-input" placeholder="0" min="1" step="1">
+                </div>
+            </div>
+        </section>
+
+        <section class="container" style="padding-bottom: 6rem;">
+            
+            <div class="grid" id="options-grid">
+                <div class="card opt-1 hover-target" onclick="calculateSplit(1, 2)">
+                    <div class="card-content">
+                        <div class="card-title">Option 1</div>
+                        <div class="card-days">2 Payments</div>
+                    </div>
+                </div>
+
+                <div class="card opt-2 hover-target" onclick="calculateSplit(2, 3)">
+                    <div class="card-content">
+                        <div class="card-title">Option 2</div>
+                        <div class="card-days">3 Payments</div>
+                    </div>
+                </div>
+
+                <div class="card opt-3 hover-target" onclick="calculateSplit(3, 4)">
+                    <div class="card-content">
+                        <div class="card-title">Option 3</div>
+                        <div class="card-days">4 Payments</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="visualizer" id="visualizer">
+                <div class="vis-header" id="visHeader">Your Payment Breakdown</div>
+                
+                <div class="payment-grid" id="dynamic-payments">
+                    </div>
+
+                <button class="btn-continue hover-target" id="actionBtn" onclick="confirmPlan()">Confirm Plan</button>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <h2 style="font-family: var(--font-display); font-size: 1.5rem; margin-bottom: 0.5rem;">SplitPay</h2>
+            <p style="color: rgba(255,255,255,0.6); font-size: 0.95rem;">&copy; 2026 Payment Solutions</p>
+            <div class="footer-links">
+                <a href="#" class="hover-target">Privacy Policy</a>
+                <a href="#" class="hover-target">Terms of Service</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Custom Cursor Logic
+        const dotCursor = document.getElementById('custom-cursor');
+        const glowCursor = document.getElementById('cursorGlow');
+        const calcInput = document.getElementById('calc-input');
+        const optionsGrid = document.getElementById('options-grid');
+
+        if(window.matchMedia("(pointer: fine)").matches) {
+            document.addEventListener('mousemove', (e) => {
+                dotCursor.style.left = e.clientX + 'px';
+                dotCursor.style.top = e.clientY + 'px';
+                glowCursor.style.left = e.clientX + 'px';
+                glowCursor.style.top = e.clientY + 'px';
+            });
+        }
+
+        function attachHoverEvents() {
+            document.querySelectorAll('.hover-target, a, button').forEach(target => {
+                target.addEventListener('mouseenter', () => dotCursor.classList.add('hovering'));
+                target.addEventListener('mouseleave', () => dotCursor.classList.remove('hovering'));
+            });
+        }
+        attachHoverEvents();
+
+        // Navbar Scroll Effect
+        const header = document.getElementById('main-header');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) header.classList.add('scrolled');
+            else header.classList.remove('scrolled');
+        });
+
+        // Show options grid when user types a number
+        calcInput.addEventListener('input', function() {
+            if (this.value && parseFloat(this.value) > 0) {
+                optionsGrid.classList.add('visible');
+            } else {
+                optionsGrid.classList.remove('visible');
+                document.getElementById('visualizer').classList.remove('active');
+                document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
+            }
+        });
+
+        // Core Calculation Logic
+        function calculateSplit(cardIndex, numPayments) {
+            const inputVal = calcInput.value;
+            
+            // Validate input
+            if(!inputVal || parseFloat(inputVal) <= 0) {
+                alert("Please enter a valid amount in the hero section first.");
+                calcInput.focus();
+                return;
+            }
+
+            // Math execution (ensuring whole numbers only)
+            let total = Math.round(parseFloat(inputVal));
+            let baseAmount = Math.floor(total / numPayments);
+            let remainder = total - (baseAmount * numPayments);
+
+            // UI: Handle active card state
+            document.querySelectorAll('.card').forEach(card => card.classList.remove('active'));
+            document.querySelector(`.opt-${cardIndex}`).classList.add('active');
+
+            // UI: Populate visualizer
+            const visContainer = document.getElementById('dynamic-payments');
+            visContainer.innerHTML = '';
+            
+            for(let i = 0; i < numPayments; i++) {
+                // Distribute the remainder $1 at a time to the first few payments to ensure exact total
+                let amount = baseAmount + (i < remainder ? 1 : 0); 
+                
+                let delay = i * 0.1; // Staggered animation
+                visContainer.innerHTML += `
+                    <div class="day-block" style="animation-delay: ${delay}s">
+                        <div class="day-name">Payment ${i + 1}</div>
+                        <div class="day-status">$${amount}</div>
+                    </div>
+                `;
+            }
+
+            // UI: Show visualizer and CTA
+            const visualizer = document.getElementById('visualizer');
+            visualizer.classList.add('active');
+            
+            const btn = document.getElementById('actionBtn');
+            btn.innerText = "Confirm Plan"; // reset text if previously clicked
+            btn.style.display = 'block';
+            setTimeout(() => btn.classList.add('visible'), 300);
+
+            // Smooth scroll to results
+            setTimeout(() => {
+                visualizer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 100);
+        }
+
+        // CTA function
+        function confirmPlan() {
+            const btn = document.getElementById('actionBtn');
+            btn.innerText = "Plan Confirmed!";
+            btn.style.background = "var(--success-color)";
+            btn.style.color = "#ffffff";
+            
+            setTimeout(() => {
+                alert("Your payment plan has been securely confirmed.");
+                // Reset styling
+                btn.innerText = "Confirm Plan";
+                btn.style.background = "var(--accent-color)";
+                btn.style.color = "var(--bg-color)";
+            }, 500);
+        }
+    </script>
+</body>
+</html>
