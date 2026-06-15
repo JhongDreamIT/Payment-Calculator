@@ -10,7 +10,6 @@
     
     <style>
         :root {
-            /* Adapted for dark theme to match the glowing video */
             --text-color: #ffffff;
             --bg-color: #050411; 
             --accent-color: #00e5ff;
@@ -157,12 +156,11 @@
 
         /* Layout & White Space */
         .container {
-            max-width: 1200px; /* Tighter container for calculator focus */
+            max-width: 1200px; 
             margin: 0 auto;
             padding: 0 5%;
             width: 100%;
         }
-        .section-pad { padding: 8rem 0; }
         
         #content-wrapper {
             position: relative;
@@ -183,7 +181,7 @@
         }
 
         .hero-content {
-            max-width: 800px;
+            max-width: 900px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -205,12 +203,24 @@
             animation: fadeIn 1.2s ease forwards 0.4s;
         }
 
-        /* Main Input Field */
+        /* Main Input Fields */
+        .input-group {
+            display: flex;
+            gap: 2rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            width: 100%;
+            animation: fadeIn 1.2s ease forwards 0.6s;
+        }
+
         .calc-input-wrapper {
             position: relative;
-            width: 100%;
-            max-width: 500px;
-            animation: fadeIn 1.2s ease forwards 0.6s;
+            flex: 1;
+            min-width: 250px;
+            max-width: 350px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 0.5rem;
         }
 
         .calc-input {
@@ -219,7 +229,7 @@
             border: none;
             border-bottom: 2px solid rgba(255, 255, 255, 0.3);
             color: var(--text-color);
-            font-size: 3rem;
+            font-size: 2rem;
             font-family: var(--font-display);
             font-weight: 700;
             text-align: center;
@@ -236,12 +246,19 @@
             color: rgba(255, 255, 255, 0.2);
         }
 
+        /* Customizing date picker icon for dark theme */
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            filter: invert(1);
+            opacity: 0.5;
+            cursor: none;
+        }
+
         .currency-symbol {
             position: absolute;
             left: 20px;
             top: 50%;
             transform: translateY(-50%);
-            font-size: 3rem;
+            font-size: 2rem;
             font-family: var(--font-display);
             font-weight: 700;
             opacity: 0.5;
@@ -354,13 +371,14 @@
             flex-wrap: wrap;
             justify-content: center;
             gap: 1.5rem;
+            margin-bottom: 3rem;
         }
 
         .day-block {
             flex: 1;
             min-width: 200px;
             border: 1px solid var(--accent-color);
-            padding: 2.5rem 1rem;
+            padding: 2rem 1rem;
             text-align: center;
             border-radius: 16px;
             background: var(--text-color);
@@ -375,15 +393,40 @@
             to { opacity: 1; transform: scale(1); }
         }
 
-        .day-name { font-size: 1.1rem; font-weight: 600; margin-bottom: 0.5rem; opacity: 0.7; }
+        .day-name { font-size: 0.95rem; font-weight: 600; margin-bottom: 0.25rem; opacity: 0.7; }
+        .day-date { font-size: 1.1rem; font-weight: 700; margin-bottom: 1rem; }
         .day-status { font-family: var(--font-display); font-size: 2rem; font-weight: 800; }
+
+        /* Copy & Paste Summary Box */
+        .summary-container {
+            max-width: 600px;
+            margin: 0 auto;
+            text-align: left;
+        }
+
+        .summary-textarea {
+            width: 100%;
+            height: 180px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--text-color);
+            padding: 1.5rem;
+            border-radius: 12px;
+            font-family: var(--font-main);
+            font-size: 1rem;
+            resize: none;
+            outline: none;
+            line-height: 1.5;
+            margin-bottom: 1rem;
+            transition: border-color 0.3s ease;
+        }
+        
+        .summary-textarea:focus { border-color: var(--accent-color); }
 
         /* CTA (Call to Action) */
         .btn-continue {
-            display: none;
+            display: block;
             width: 100%;
-            max-width: 300px;
-            margin: 4rem auto 0;
             background: var(--accent-color);
             color: var(--bg-color);
             padding: 1.2rem 2.5rem;
@@ -392,11 +435,9 @@
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.05em;
-            opacity: 0;
-            transform: translateY(20px);
             transition: all 0.4s var(--transition-smooth);
         }
-        .btn-continue.visible { display: block; opacity: 1; transform: translateY(0); }
+        
         .btn-continue:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(0, 229, 255, 0.3); }
 
         /* Footer */
@@ -422,23 +463,26 @@
         @media (max-width: 900px) {
             .grid { grid-template-columns: repeat(1, 1fr); gap: 1.5rem; }
             .hero { padding-top: 10rem; min-height: auto; }
-            .calc-input { font-size: 2.5rem; }
-            .currency-symbol { font-size: 2.5rem; }
+            .calc-input { font-size: 1.75rem; }
+            .currency-symbol { font-size: 1.75rem; }
         }
 
         @media (max-width: 768px) {
             header { padding: 1.5rem 5%; }
-            .nav-links { display: none; } /* Simplify on mobile */
+            .nav-links { display: none; }
             .section-pad { padding: 4rem 0; }
             
+            .input-group { gap: 1rem; }
+            .calc-input-wrapper { min-width: 100%; }
+
             .visualizer { padding: 3rem 1.5rem; }
             .day-block { min-width: 100%; }
             
             /* Disable custom cursor on mobile */
             .cursor, .cursor-glow { display: none; }
             body { cursor: auto; }
-            a, button, input { cursor: pointer; }
-            .calc-input { cursor: text; }
+            a, button, input, textarea { cursor: pointer; }
+            .calc-input, .summary-textarea { cursor: text; }
         }
     </style>
 </head>
@@ -468,11 +512,17 @@
         <section class="hero container">
             <div class="hero-content">
                 <h1>Payment Calculator</h1>
-                <p class="hero-subtitle">Enter your total amount to automatically split it into whole USD payments.</p>
+                <p class="hero-subtitle">Enter your total amount and start date to automatically split it into whole USD payments. The final payment absorbs any remainder.</p>
                 
-                <div class="calc-input-wrapper hover-target">
-                    <span class="currency-symbol">$</span>
-                    <input type="number" id="calc-input" class="calc-input" placeholder="0" min="1" step="1">
+                <div class="input-group">
+                    <div class="calc-input-wrapper hover-target">
+                        <span class="currency-symbol">$</span>
+                        <input type="number" id="calc-input" class="calc-input" placeholder="Amount" min="1" step="1">
+                    </div>
+                    
+                    <div class="calc-input-wrapper hover-target">
+                        <input type="date" id="start-date" class="calc-input">
+                    </div>
                 </div>
             </div>
         </section>
@@ -508,7 +558,10 @@
                 <div class="payment-grid" id="dynamic-payments">
                     </div>
 
-                <button class="btn-continue hover-target" id="actionBtn" onclick="confirmPlan()">Confirm Plan</button>
+                <div class="summary-container">
+                    <textarea id="summary-text" class="summary-textarea" readonly></textarea>
+                    <button class="btn-continue hover-target" id="copyBtn" onclick="copySummary()">Copy Details</button>
+                </div>
             </div>
         </section>
     </main>
@@ -529,6 +582,7 @@
         const dotCursor = document.getElementById('custom-cursor');
         const glowCursor = document.getElementById('cursorGlow');
         const calcInput = document.getElementById('calc-input');
+        const dateInput = document.getElementById('start-date');
         const optionsGrid = document.getElementById('options-grid');
 
         if(window.matchMedia("(pointer: fine)").matches) {
@@ -555,83 +609,128 @@
             else header.classList.remove('scrolled');
         });
 
-        // Show options grid when user types a number
-        calcInput.addEventListener('input', function() {
-            if (this.value && parseFloat(this.value) > 0) {
+        // Show options grid when user types a number AND a date
+        function checkInputs() {
+            if (calcInput.value && parseFloat(calcInput.value) > 0 && dateInput.value) {
                 optionsGrid.classList.add('visible');
             } else {
                 optionsGrid.classList.remove('visible');
                 document.getElementById('visualizer').classList.remove('active');
                 document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
             }
-        });
+        }
+
+        calcInput.addEventListener('input', checkInputs);
+        dateInput.addEventListener('input', checkInputs);
 
         // Core Calculation Logic
         function calculateSplit(cardIndex, numPayments) {
             const inputVal = calcInput.value;
+            const startDateVal = dateInput.value;
             
-            // Validate input
+            // Validate inputs
             if(!inputVal || parseFloat(inputVal) <= 0) {
-                alert("Please enter a valid amount in the hero section first.");
+                alert("Please enter a valid amount.");
                 calcInput.focus();
                 return;
             }
+            if(!startDateVal) {
+                alert("Please select a start date.");
+                dateInput.focus();
+                return;
+            }
 
-            // Math execution (ensuring whole numbers only)
+            // Math execution (ensuring whole numbers only, remainder to the final payment)
             let total = Math.round(parseFloat(inputVal));
             let baseAmount = Math.floor(total / numPayments);
-            let remainder = total - (baseAmount * numPayments);
+            let lastAmount = baseAmount + (total - (baseAmount * numPayments));
+
+            // Parse Date safely avoiding timezone shifts
+            let [year, month, day] = startDateVal.split('-');
+            let startYear = parseInt(year);
+            let startMonth = parseInt(month) - 1; // JS months are 0-indexed
+            let startDay = parseInt(day);
 
             // UI: Handle active card state
             document.querySelectorAll('.card').forEach(card => card.classList.remove('active'));
             document.querySelector(`.opt-${cardIndex}`).classList.add('active');
 
-            // UI: Populate visualizer
+            // UI Elements
             const visContainer = document.getElementById('dynamic-payments');
             visContainer.innerHTML = '';
             
+            let summaryString = `Total Amount: $${total}\nPayment Plan: ${numPayments} Installments\n\nSchedule:\n`;
+
             for(let i = 0; i < numPayments; i++) {
-                // Distribute the remainder $1 at a time to the first few payments to ensure exact total
-                let amount = baseAmount + (i < remainder ? 1 : 0); 
+                // Last payment absorbs remainder
+                let amount = (i === numPayments - 1) ? lastAmount : baseAmount; 
                 
-                let delay = i * 0.1; // Staggered animation
+                // Add exactly 'i' months to the initial date
+                let paymentDate = new Date(startYear, startMonth + i, startDay);
+                
+                // DISPLAY DATE: e.g., "January 1, 2026"
+                let displayDateString = paymentDate.toLocaleDateString('en-US', { 
+                    month: 'long', day: 'numeric', year: 'numeric' 
+                });
+
+                // COPY/PASTE DATE: e.g., "01/01/2026"
+                let copyDateString = paymentDate.toLocaleDateString('en-US', { 
+                    month: '2-digit', day: '2-digit', year: 'numeric' 
+                });
+
+                // Add to visual boxes
+                let delay = i * 0.1;
                 visContainer.innerHTML += `
                     <div class="day-block" style="animation-delay: ${delay}s">
                         <div class="day-name">Payment ${i + 1}</div>
+                        <div class="day-date">${displayDateString}</div>
                         <div class="day-status">$${amount}</div>
                     </div>
                 `;
+
+                // Add to text summary (Numeric format)
+                summaryString += `- Payment ${i + 1} (${copyDateString}): $${amount}\n`;
             }
 
-            // UI: Show visualizer and CTA
+            // Populate the text area
+            document.getElementById('summary-text').value = summaryString;
+
+            // Reset copy button state
+            const btn = document.getElementById('copyBtn');
+            btn.innerText = "Copy Details";
+            btn.style.background = "var(--accent-color)";
+            btn.style.color = "var(--bg-color)";
+
+            // Show visualizer and smooth scroll
             const visualizer = document.getElementById('visualizer');
             visualizer.classList.add('active');
             
-            const btn = document.getElementById('actionBtn');
-            btn.innerText = "Confirm Plan"; // reset text if previously clicked
-            btn.style.display = 'block';
-            setTimeout(() => btn.classList.add('visible'), 300);
-
-            // Smooth scroll to results
             setTimeout(() => {
                 visualizer.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }, 100);
         }
 
-        // CTA function
-        function confirmPlan() {
-            const btn = document.getElementById('actionBtn');
-            btn.innerText = "Plan Confirmed!";
-            btn.style.background = "var(--success-color)";
-            btn.style.color = "#ffffff";
+        // Copy functionality
+        function copySummary() {
+            const summaryBox = document.getElementById('summary-text');
+            const btn = document.getElementById('copyBtn');
             
-            setTimeout(() => {
-                alert("Your payment plan has been securely confirmed.");
-                // Reset styling
-                btn.innerText = "Confirm Plan";
-                btn.style.background = "var(--accent-color)";
-                btn.style.color = "var(--bg-color)";
-            }, 500);
+            // Select and copy
+            summaryBox.select();
+            summaryBox.setSelectionRange(0, 99999); // For mobile devices
+            navigator.clipboard.writeText(summaryBox.value).then(() => {
+                btn.innerText = "Copied to Clipboard!";
+                btn.style.background = "var(--success-color)";
+                btn.style.color = "#ffffff";
+                
+                setTimeout(() => {
+                    btn.innerText = "Copy Details";
+                    btn.style.background = "var(--accent-color)";
+                    btn.style.color = "var(--bg-color)";
+                }, 3000);
+            }).catch(err => {
+                console.error("Failed to copy text: ", err);
+            });
         }
     </script>
 </body>
